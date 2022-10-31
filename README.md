@@ -1,4 +1,4 @@
-# Folder_Sorter_AI_HYU2022
+## Folder Sorter
 
 # Team members
 - Mathias BALIAN | mathias.balian92@gmail.com | Hanyang University
