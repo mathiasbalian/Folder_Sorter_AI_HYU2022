@@ -38,11 +38,11 @@ try:
             elif os.path.splitext(file)[1] == ".doc" or os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
                 text = textfromword(file)
 
-            for word in text:
-                word = word.lower()
+            for word in text:  # We iterate over each word in the file's text
+                word = word.lower()  # Put it to lowercase to match dataset words
                 total_counter += 1
-                for subject in dataset:
-                    if dataset[subject][0].count(word) > 0:
+                for subject in dataset:  # We iterate over each subject of the dataset
+                    if dataset[subject][0].count(word) > 0:  # If the word from the text is present is the subject's list of words
                         dataset[subject][1] += 1
 
         else:
