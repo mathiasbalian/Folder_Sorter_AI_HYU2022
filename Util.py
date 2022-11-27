@@ -40,3 +40,4 @@ def textfromword(path):
     text = textract.process(path)  # We extract the text from the file
     text = text.decode("utf-8")
     return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', text)))
+
