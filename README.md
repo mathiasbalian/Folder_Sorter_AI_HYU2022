@@ -37,3 +37,10 @@ dataset = {"biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
 f.close()
 ```
 
+## 4. The project
+### Prerequisites
+As this project uses some libraries that are not included in the default python package, we need to install them manually. For this, simply run the following command:
+  
+```console
+$ pip install -r requirements.txt
+```
