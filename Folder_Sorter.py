@@ -1,7 +1,7 @@
 import os
 import tkinter
 from tkinter import filedialog
-from Util import textfrompdf
+from Util import textfrompdf, textfromword
 
 f = open("Dataset_Topics.txt", "r")
 
