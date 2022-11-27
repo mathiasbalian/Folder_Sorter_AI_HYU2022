@@ -19,19 +19,21 @@ The tool would first have to undergo a phase of machine learning in order to gai
 In order for our tool to classify the files, it needs to rely on a set of words related to a specific subject. If the tool needs to categorize a folder with both chemistry and computer science documents, it needs some chemistry and computer science related words in order to know which file belongs to which category. However, we couldn't find such datasets containing only words from a specific category, so we had to create our own. For that, we went on different websites listing the most used and common words related to a category, extracted the majority of the words that we thought were coherent, and wrote them all in a text file. In this file, each line contains all the words of a single category. Each word of a category is separated by a ";" which makes it easy to read in the code. At the end of a category, a new line is used. This allows us to read all te words of a category by a single call of the readline function in python.
   
 ![image](https://user-images.githubusercontent.com/107269689/204087677-db7d02de-1cd7-4ca2-9ba9-e6c4f799b59a.png)  
-<sub>Each line corresponds to a school subject (in order: Biology, Computer science, Physics, Chemistry, Philosophy)</sub>  
+<sub>Each line corresponds to a school subject (in order: Biology, Computer science, Physics, Chemistry, Mathematics, Philosophy)</sub>  
   
 In our code, we create a dictionary where the keys are the different school subjects and the values are the list of words from this school subject:
 
 ```python
 f = open("Dataset_Topics.txt", "r")
 
-dataset = {"biology": list(dict.fromkeys(f.readline().split(";"))),
-           "compsci": list(dict.fromkeys(f.readline().split(";"))),
-           "physics": list(dict.fromkeys(f.readline().split(";"))),
-           "chemistry": list(dict.fromkeys(f.readline().split(";"))),
-           "philosophy": list(dict.fromkeys(f.readline().split(";")))}
-           
+# We create a dictionary where the key is a school subject
+# and the value is the list of the words related to this subject and a counter for the subject
+dataset = {"biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "compsci": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "physics": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "chemistry": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "mathematics": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
 f.close()
 ```
 
