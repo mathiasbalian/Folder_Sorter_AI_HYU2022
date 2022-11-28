@@ -1,6 +1,8 @@
 import PyPDF2
 import textract
 import re
+import os
+import shutil
 
 
 # Function which takes a pdf file path and returns the text in the file
@@ -40,4 +42,14 @@ def textfromword(path):
     text = textract.process(path)  # We extract the text from the file
     text = text.decode("utf-8")
     return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', text)))
+
+def move_to_folder(subject, folder_path, filename):
+    path_newfolder = os.path.join(folder_path, subject)
+    try:
+        os.mkdir(path_newfolder)
+        print('A folder named ', subject, ' has been created.')
+    except FileExistsError:
+        print('A folder named ', subject, ' already exists.')
+    path_to_file = os.path.join(folder_path, filename)
+    shutil.move(path_to_file, path_newfolder)
 
