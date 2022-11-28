@@ -15,12 +15,12 @@ dataset = {"biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
            "philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
 f.close()
 
-# Counters for each school subject possible
-biology_counter = 0
-compsci_counter = 0
-physics_counter = 0
-chemistry_counter = 0
-philosophy_counter = 0
+
+
+
+
+
+# Counter for the total of words in a document
 total_counter = 0
 
 # We open a file dialog for the user
@@ -29,6 +29,8 @@ folder_path = filedialog.askdirectory()
 
 try:
     for filename in os.listdir(folder_path):
+        for subject in dataset:  # We reset the word counter for each subject
+           dataset[subject][1] = 0 
         total_counter = 0
         file = os.path.join(folder_path, filename)
         if os.path.isfile(file):
