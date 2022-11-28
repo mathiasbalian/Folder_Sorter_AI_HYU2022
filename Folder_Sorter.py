@@ -1,26 +1,20 @@
 import os
 import tkinter
 from tkinter import filedialog
-from Util import textfrompdf, textfromword
+from Util import textfrompdf, textfromword, move_to_folder
 
 f = open("Dataset_Topics.txt", "r")
 
 # We create a dictionary where the key is a school subject
 # and the value is the list of the words related to this subject
-dataset = {"biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "compsci": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "physics": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "chemistry": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "mathematics": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
+dataset = {"Biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Compsci": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Physics": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Chemistry": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Mathematics": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
 f.close()
 
-# Counters for each school subject possible
-biology_counter = 0
-compsci_counter = 0
-physics_counter = 0
-chemistry_counter = 0
-philosophy_counter = 0
 total_counter = 0
 
 # We open a file dialog for the user
@@ -29,6 +23,8 @@ folder_path = filedialog.askdirectory()
 
 try:
     for filename in os.listdir(folder_path):
+        for subject in dataset:
+            dataset[subject][1] = 0
         total_counter = 0
         file = os.path.join(folder_path, filename)
         if os.path.isfile(file):
@@ -44,6 +40,16 @@ try:
                 for subject in dataset:  # We iterate over each subject of the dataset
                     if dataset[subject][0].count(word) > 0:  # If the word from the text is present is the subject's list of words
                         dataset[subject][1] += 1
+
+            max = 0
+            subject_result = ""
+            for subject in dataset:
+                if dataset[subject][1] >= max:
+                    max = dataset[subject][1]
+                    subject_result = subject
+            print(subject_result)
+            move_to_folder(subject_result, folder_path, filename)
+
 
         else:
             print("The file", file, "is not supported.")
