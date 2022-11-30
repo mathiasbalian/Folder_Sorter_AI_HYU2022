@@ -16,14 +16,11 @@ dataset = {"Biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
            "Philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
 f.close()
 
-total_counter = 0
-
 
 def wordcounter(filetext):
     global total_counter
     for word in filetext:
         word = word.lower()
-        total_counter += 1
         for subject in dataset:
             if dataset[subject][0].count(word) > 0:
                 dataset[subject][1] += 1
