@@ -1,27 +1,48 @@
 import os
 import tkinter
+import shutil
 from tkinter import filedialog
 from Util import textfrompdf, textfromword
 
 f = open("Dataset_Topics.txt", "r")
 
 # We create a dictionary where the key is a school subject
-# and the value is the list of the words related to this subject
-dataset = {"biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "compsci": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "physics": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "chemistry": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "mathematics": [list(dict.fromkeys(f.readline().split(";"))), 0],
-           "philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
+# and the value is the list of the words related to this subject and a counter for the subject
+dataset = {"Biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Compsci": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Physics": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Chemistry": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Mathematics": [list(dict.fromkeys(f.readline().split(";"))), 0],
+           "Philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
 f.close()
 
-# Counters for each school subject possible
-biology_counter = 0
-compsci_counter = 0
-physics_counter = 0
-chemistry_counter = 0
-philosophy_counter = 0
 total_counter = 0
+
+
+def wordcounter(filetext):
+    global total_counter
+    for word in filetext:
+        word = word.lower()
+        total_counter += 1
+        for subject in dataset:
+            if dataset[subject][0].count(word) > 0:
+                dataset[subject][1] += 1
+
+
+def getsubject():
+    maximum = 0
+    category = ""
+    for subject in dataset:
+        if dataset[subject][1] > maximum:
+            maximum = dataset[subject][1]
+            category = subject
+    return category
+
+
+def resetcounters():
+    for subject in dataset:
+        dataset[subject][1] = 0
+
 
 # We open a file dialog for the user
 tkinter.Tk().withdraw()
@@ -38,12 +59,16 @@ try:
             elif os.path.splitext(file)[1] == ".doc" or os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
                 text = textfromword(file)
 
-            for word in text:
-                word = word.lower()
-                total_counter += 1
-                for subject in dataset:
-                    if dataset[subject][0].count(word) > 0:
-                        dataset[subject][1] += 1
+            wordcounter(text)
+            category = getsubject()
+            resetcounters()
+
+            try:
+                os.mkdir(folder_path + "/" + category)
+            except:
+                pass
+
+            shutil.move(file, folder_path + "/" + category)
 
         else:
             print("The file", file, "is not supported.")
@@ -51,5 +76,3 @@ try:
 except:
     print("File not provided or not found")
 
-for subject in dataset:
-    print(subject, dataset[subject][1])
