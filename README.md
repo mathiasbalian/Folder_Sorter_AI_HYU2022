@@ -37,7 +37,10 @@ dataset = {"biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
            "philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
 f.close()
 ```
-##4. Methodology
+## 4. Methodology
+
+- **_Our choice of algorithm_** 
+
 First, let's deal with our first idea, which was to use a dataset of words to classify the files. 
 As explained in the previous part of the blog, we first initialized our dataset as a dictionary.
 Then, the users can choose the folder that they want to classify. We wanted this to be easy to understand for every users, so we display the file explorer so that they can directly click on the folder they want.
@@ -48,6 +51,11 @@ Here are the steps for this purpose :
 - Still for the same file, we determine the maximum counter to get the right subject.
 - Finally, we create a folder that have the name of the right subject and we move the file in it. If the folder already exists, we directly move the file in it.
 
+- **_The code in details_** 
+
+Let's come back on our first algorithm. 
+To 
+
 ## 6. Related Work
 ### Prerequisites
 As this project uses some libraries that are not included in the default python package, we need to install them manually. For this, simply run the following command:
@@ -55,3 +63,7 @@ As this project uses some libraries that are not included in the default python 
 ```console
 $ pip install -r requirements.txt
 ```
+
+## 7. Conclusion
+
+(Talk about the limits like no permission to move a file)
