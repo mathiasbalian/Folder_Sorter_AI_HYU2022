@@ -53,15 +53,49 @@ Here are the steps for this purpose :
 - Finally, we create a folder that have the name of the right subject and we move the file in it. If the folder already exists, we directly move the file in it.
 
 ### The code
- 
-Now we would like to explain in details our code.
 
-#### Text extraction
+#### **_Text extraction_** 
 
 We created a separate file named Util.py, which contains two functions concerning the text extraction.
 Our ojective is to get the content of files that we want to sort, but we have to consider the format of the files. We chose to work with only .pdf, .doc and .docx files. 
 Let's start with pdf files :
-We used a library named PyPDF2 for the function 'textfrompdf(path)'. The function takes a string variable as parameter, which is the path to the pdf files in the file explorer. We had to take care of an exception which is "Unable to open the file", because sometimes pdf files are encrypted, or just are simply not supported. By using the library PyPDF2, we are able to extract the content of the file with the function PyPDF2.PdfFileReader(file).
+We used a library named PyPDF2 for the function 'textfrompdf(path)'. The function takes a string variable as parameter, which is the path to the pdf files in the file explorer. We had to take care of an exception which is "Unable to open the file", because sometimes pdf files are encrypted, or just are simply not supported. By using the library PyPDF2, we are able to read the content of the file with the function PyPDF2.PdfFileReader(file) and stock it in a string variable with the .extractText() function. Finally we don't forget to split the words by spaces.
+Here is the code :
+
+```python
+def textfrompdf(path):
+    fileobj = None
+    try:
+        fileobj = open(path, mode='rb')
+    except:
+        print("Unable to open the file")
+
+    pdfcontent = ""  # The string containing the text of the file
+    pdfreader = PyPDF2.PdfFileReader(fileobj)
+    for i in range(0, pdfreader.numPages):  # We iterate over the pages of the document
+        pageobj = pdfreader.getPage(i)
+        pdfcontent += pageobj.extractText()
+
+    return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', pdfcontent)))
+```
+
+The concept for the doc and docx files is the same as pdf, but this time we use the textract library. We're going to give details about libraries in a next part.
+
+```python
+def textfromword(path):
+    # Test if the path is valid
+    file = None
+    try:
+        file = open(path, "r")
+    except:
+        print("Unable to open the file")
+    finally:
+        file.close()
+
+    text = textract.process(path)  # We extract the text from the file
+    text = text.decode("utf-8")
+    return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', text)))
+```
 
 ## 6. Related Work
 ### Prerequisites
