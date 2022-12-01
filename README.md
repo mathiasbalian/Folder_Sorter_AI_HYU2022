@@ -20,7 +20,7 @@ This time, we used a very different approach than the previous one. As the first
 
 ### The dataset
 First of all, we need a dataset in order to train our ML model. For this, we downloaded some files (pdf and docx) on internet with some contents of the different school subjects that our project is able to handle. We then classified them into folders corresponding to the subject of each document. Each folder contained around 10 files, which were all about 10-15 pages long.
-From this point, we had our dataset ready. The first thing that we had to do is creating a dataframe using the pandas library. For this, we first created a list containing all the data, i.e the text that was extracted form each file of each subject.
+From this point, we had our dataset ready. The first thing that we had to do is creating a dataframe using the pandas library. For this, we first created a list containing all the data, i.e the text that was extracted from each file of each subject.
   
 ```python
 import pandas as pd
@@ -42,7 +42,7 @@ From now on, we could start treating the text that was extracted.
 ### Text preprocessing
 When reading and extracting text from a pdf or word document, the text can quickly become bloated with some unwanted escape characters, single characters, empty characters etc... That's why we need to tokenize and lemmatize the text. What does this mean ?
 - **Text tokenization**  
-Text tokenization is the process of separating a text into "tokens". Usually, we do this by splitting the text by whitespaces, removing escape characters and punctuation and putting the text in lowercase. Everything that could be considered as unwanted in a text where only the words themsevles are important is removed.  
+Text tokenization is the process of separating a text into "tokens". Usually, we do this by splitting the text by whitespaces, removing escape characters, punctuation, useless words and putting the text in lowercase. Everything that could be considered as unwanted in a text where only the words themsevles are important is removed.  
 If we take back our dataframe previously created, we can iterate over each text in this dataframe, and tokenize it using regex expressions:
 
 ```python
@@ -73,7 +73,7 @@ The next step is to lemmatize the text
 - **Text lemmatization**  
 Lemmatization is the process of switching any word to its base root. For example, "leaves" becomes "leaf". Similarly, "caring" becomes "care".
 This is very important as it makes it much easier for our ML model to learn and understand the topics of the text that it is analysing.  
-With the previous step and te lemmatization of the text, we get the following code for our text preprocessing:
+With the previous step and the lemmatization of the text, we get the following code for our text preprocessing:
 ```python
 import re
 import nltk
