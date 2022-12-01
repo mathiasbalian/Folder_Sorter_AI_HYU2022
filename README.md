@@ -57,7 +57,7 @@ Here are the steps for this purpose :
 #### **_Text extraction_** 
 
 We created a separate file named Util.py, which contains two functions concerning the text extraction.
-Our ojective is to get the content of files that we want to sort, but we have to consider the format of the files. We chose to work with only .pdf, .doc and .docx files. 
+Our ojective is to get the content of files that we want to sort, but we have to consider the format of the files. We chose to work with only .pdf and .docx files. 
 Let's start with pdf files :
 We used a library named PyPDF2 for the function 'textfrompdf(path)'. The function takes a string variable as parameter, which is the path to the pdf files in the file explorer. We had to take care of an exception which is "Unable to open the file", because sometimes pdf files are encrypted, or just are simply not supported. By using the library PyPDF2, we are able to read the content of the file with the function PyPDF2.PdfFileReader(file) and stock it in a string variable with the .extractText() function. Finally we don't forget to split the words by spaces.
 Here is the code :
@@ -79,7 +79,7 @@ def textfrompdf(path):
     return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', pdfcontent)))
 ```
 
-The concept for the doc and docx files is the same as pdf, but this time we use the textract library. We're going to give details about libraries in a next part.
+The concept for the docx files is the same as pdf, but this time we use the textract library. We're going to give details about libraries in a next part.
 
 ```python
 def textfromword(path):
@@ -96,6 +96,90 @@ def textfromword(path):
     text = text.decode("utf-8")
     return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', text)))
 ```
+
+#### **_Text Analyzing_** 
+
+Now, let's deal with the principal file FolderSorter.py. First, we open the file explorer with the library tkinter, which can allow the user to directly select the folder he wants. The function filedialog.askdirectory() return the path to the folder in a string variable.
+```python
+import tkinter
+from tkinter import filedialog
+
+tkinter.Tk().withdraw()
+folder_path = filedialog.askdirectory()
+```
+
+Next, we don't forget to take care of the exception like when there is no file or no more file to process in the folder, and when the file is not supported or can't be open.
+So, we start by extracting the text with the functions we explained just before. Then, we count the words related to each subject in the extracted text. For this purpose, we created a function called wordcounter(filetext). This function go through all words of the text and detect whether the word is in the dictionary and for which subject. If the word exists, the counter of the specific subject is incremented. 
+
+```python
+def wordcounter(filetext):
+    global total_counter
+    for word in filetext:
+        word = word.lower()
+        total_counter += 1
+        for subject in dataset:
+            if dataset[subject][0].count(word) > 0:
+                dataset[subject][1] += 1
+ ```
+ 
+ After that, we can obtain the final category of the file by finding the maximum counter. We did that in a function called getsubject() which returns a string representing the name of the category result.
+ 
+ ```python
+ def getsubject():
+    maximum = 0
+    category = ""
+    for subject in dataset:
+        if dataset[subject][1] > maximum:
+            maximum = dataset[subject][1]
+            category = subject
+    return category
+ ```
+ 
+ And then we reset the counters for the next file with this little function :
+ 
+ ```python
+ def resetcounters():
+    for subject in dataset:
+        dataset[subject][1] = 0
+ ```
+ 
+ Finally, with the library os, we create a folder named as the category we obtained, and with the library shutil, we move the file to this folder. We don't forget to check if the category file already exists or not. If it does, then we don't create a new one and we just move the file in the existing folder.
+ 
+ Here is our final code :
+ 
+ ```python
+ # We open a file dialog for the user
+tkinter.Tk().withdraw()
+folder_path = filedialog.askdirectory()
+
+try:
+    for filename in os.listdir(folder_path):
+        total_counter = 0
+        file = os.path.join(folder_path, filename)
+        if os.path.isfile(file):
+            text = []
+            if os.path.splitext(file)[1] == ".pdf":  # If the file is a pdf file
+                text = textfrompdf(file)
+            elif os.path.splitext(file)[1] == ".doc" or os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
+                text = textfromword(file)
+
+            wordcounter(text)
+            category = getsubject()
+            resetcounters()
+
+            try:
+                os.mkdir(folder_path + "/" + category)
+            except:
+                pass
+
+            shutil.move(file, folder_path + "/" + category)
+
+        else:
+            print("The file", file, "is not supported.")
+
+except:
+    print("File not provided or not found")
+ ```
 
 ## 6. Related Work
 ### Prerequisites
