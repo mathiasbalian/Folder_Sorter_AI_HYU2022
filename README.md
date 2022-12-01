@@ -21,5 +21,5 @@ In order for our tool to classify the files, it needs to rely on a set of words 
 ![image](https://user-images.githubusercontent.com/107269689/204087677-db7d02de-1cd7-4ca2-9ba9-e6c4f799b59a.png)  
 <sub>Each line corresponds to a school subject (in order: Biology, Computer science, Physics, Chemistry, Philosophy)</sub>
 
-
-
+To fill our second dataset with files, we use these websites:
+- https://ocw.mit.edu/
