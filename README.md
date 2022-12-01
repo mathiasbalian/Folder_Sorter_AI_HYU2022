@@ -16,7 +16,10 @@ Our goal is to have a functionning AI tool that would sort and organize our file
 Our first idea was to use some word databases for various categories in order to get the content subject of a file and give the AI the ability to categorize a large range of files.
 But this idea didn't make us really satisfied. We prefered to make the tool having to undergo a phase of machine learning in order to gain in precision and to keep improving in categorizing files. We tried to do that way, and we chose to show you both of our works.
 
-## 3. The Dataset
+## 3. The rule-based method 
+
+### The dataset 
+
 For our first idea, we needed a dataset with as many words as possible per specific subject. If the tool needs to categorize a folder with both chemistry and computer science documents, it needs some chemistry and computer science related words in order to know which file belongs to which category. However, we couldn't find such datasets containing only words from a specific category, so we had to create our own. For that, we went on different websites listing the most used and common words related to a category, extracted the majority of the words that we thought were coherent, and wrote them all in a text file. In this file, each line contains all the words of a single category. Each word of a category is separated by a ";" which makes it easy to read in the code. At the end of a category, a new line is used. This allows us to read all te words of a category by a single call of the readline function in python.
   
 ![image](https://user-images.githubusercontent.com/107269689/204087677-db7d02de-1cd7-4ca2-9ba9-e6c4f799b59a.png)  
@@ -37,12 +40,10 @@ dataset = {"biology": [list(dict.fromkeys(f.readline().split(";"))), 0],
            "philosophy": [list(dict.fromkeys(f.readline().split(";"))), 0]}
 f.close()
 ```
-## 4. Methodology
+### Methodology
 
-- **_Our choice of algorithm_** 
-
-First, let's deal with our first idea, which was to use a dataset of words to classify the files. 
-As explained in the previous part of the blog, we first initialized our dataset as a dictionary.
+Let's quickly explain the steps of our algorithm. 
+As explained in the previous part, we first initialized our dataset as a dictionary.
 Then, the users can choose the folder that they want to classify. We wanted this to be easy to understand for every users, so we display the file explorer so that they can directly click on the folder they want.
 After that, everything is set up. The user will not interact with the code anymore. We're going to analyze the files one by one in the selected folder. 
 Here are the steps for this purpose :
@@ -51,10 +52,16 @@ Here are the steps for this purpose :
 - Still for the same file, we determine the maximum counter to get the right subject.
 - Finally, we create a folder that have the name of the right subject and we move the file in it. If the folder already exists, we directly move the file in it.
 
-- **_The code in details_** 
+### The code
+ 
+Now we would like to explain in details our code.
 
-Let's come back on our first algorithm. 
-To 
+#### Text extraction
+
+We created a separate file named Util.py, which contains two functions concerning the text extraction.
+Our ojective is to get the content of files that we want to sort, but we have to consider the format of the files. We chose to work with only .pdf, .doc and .docx files. 
+Let's start with pdf files :
+We used a library named PyPDF2 for the function 'textfrompdf(path)'. The function takes a string variable as parameter, which is the path to the pdf files in the file explorer. We had to take care of an exception which is "Unable to open the file", because sometimes pdf files are encrypted, or just are simply not supported. By using the library PyPDF2, we are able to extract the content of the file with the function PyPDF2.PdfFileReader(file).
 
 ## 6. Related Work
 ### Prerequisites
