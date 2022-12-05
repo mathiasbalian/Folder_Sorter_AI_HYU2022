@@ -189,6 +189,16 @@ As this project uses some libraries that are not included in the default python 
 $ pip install -r requirements.txt
 ```
 
+Like we explained in the previous parts, we needed the PyPDF2 library. We used its documentation : https://pypdf2.readthedocs.io/en/latest/user/extract-text.html.
+We only used ths library to read the content of a PDF file, but it is capable of way more than that.
+For the same goal but with docx documents, we used the textract library. Here is the documentation we used : https://textract.readthedocs.io/en/stable/.
+We could've also used this library for PDF files, but we started with PyPDF2 first, so we didn't go back on our steps.
+
+The tkinter library permits to create Graphical User Interfaces. We used it to display the file explorer so that the users can directly select the file they want to order. Here is the documentation : https://docs.python.org/3/library/tkinter.html
+
+Finally, for our idea, we needed a way to interact with the operating system, which means we needed to create and move folders or files. For this purpose, the os library was adapted. The library let us check if a file exist or not, and work with directories. Here is the documentation : https://www.analyticsvidhya.com/blog/2021/05/30-useful-methods-from-python-os-module/
+In the same purpose, the shutil library also allows us to interact with files, we used it to move the files from one folder to an other. https://docs.python.org/3/library/shutil.html
+
 ## 7. Conclusion
 
 (Talk about the limits like no permission to move a file)
