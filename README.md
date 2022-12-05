@@ -220,10 +220,10 @@ from nltk.corpus import stopwords
 texts = list(dataframe["Content"])
 
 for content in texts:
-    clean = re.sub('[^a-zA-Z]', ' ', content)
-    clean = re.sub(r'\W', ' ', content)  # Replace all escape characters (\n, \t, etc...)
-    clean = re.sub(r'\s+[a-zA-Z]\s+', ' ', content)  # Replace single characters by a whitespace
-    clean = re.sub(r'[^\w\s]', '', content)  # Replace all characters that are not a letter
+    clean = re.sub('[^a-zA-Z]', ' ', str(content))
+    clean = re.sub(r'\W', ' ', str(content))  # Replace all escape characters (\n, \t, etc...)
+    clean = re.sub(r'\s+[a-zA-Z]\s+', ' ', str(content))  # Replace single characters by a whitespace
+    clean = re.sub(r'[^\w\s]', '', str(content))  # Replace all characters that are not a letter
     clean = clean.lower()  # Put the text in lowercase
     clean = clean.split()  # Split the text by whitespaces
     clean = [word for word in clean if word not in stopwords.words('english')]  # Remove all english stop words (the, an, in...)
@@ -252,10 +252,10 @@ texts = list(dataframe["Content"])
 texts_cleaned = []
 
 for content in texts:
-    clean = re.sub('[^a-zA-Z]', ' ', content)
-    clean = re.sub(r'\W', ' ', content)
-    clean = re.sub(r'\s+[a-zA-Z]\s+', ' ', content)
-    clean = re.sub(r'[^\w\s]', '', content)
+    clean = re.sub('[^a-zA-Z]', ' ', str(content))
+    clean = re.sub(r'\W', ' ', str(content))
+    clean = re.sub(r'\s+[a-zA-Z]\s+', ' ', str(content))
+    clean = re.sub(r'[^\w\s]', '', str(content))
     clean = clean.lower()
     clean = clean.split()
     clean = [word for word in clean if word not in stopwords.words('english')]
