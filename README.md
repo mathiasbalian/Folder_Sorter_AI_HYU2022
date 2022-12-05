@@ -181,7 +181,7 @@ except:
     print("File not provided or not found")
  ```
  
- ## 4. The Bag Of Words method
+ ## 4. The Bag Of Words model
 This time, we used a very different approach than the previous one. As the first method didn't include some Machine Learning techniques and algorithms, we decided that it would be a good idea to approach our idea in a different way. That's why we used the Bag Of Words (BOW) method.
 
 ### The dataset
@@ -269,6 +269,61 @@ We have now tokenized and lemmatized each text that we extracted and stored in o
 Now that this is finished, we can start buiding our ML model.
 
 ### Building the model
+Now that the text has been processed and adapted for a Machine Learning algorithm, we can begin to create our model. As previously mentionned, we will be using the Bag Of Words model. 
+- **How does the Bag Of Words (BOW) model works ?**  
+The BOW model is a way of representing the data of a text as numeric features. For this, the algorithm creates a vocabulary of the known words that occur in the documents' text that it is analyzing and then creates a vector for each document that contains as values the counters of how often the words from the vocabulary appear.
+  
+  
+To use this model, we first extract the two columns of our dataframe: the subject of a document a the text that has been extracted from this document:
+```python
+Texts = dataframe["Content"]
+Subjects = dataframe["Subject"]
+```  
+As mentioned above, we now need to tranform our text into a vector of numbers so that the ML algorithm can understand what it has to learn. We will use the CountVectorizer class included in the sklearn.feature_extraction.text library. We first start by declaring a CountVectorizer oject, and then we use the fit_transform function wich vectorizes our Text list.  
+```python
+from sklearn.feature_extraction.text import CountVectorizer
+
+cv = CountVectorizer()
+Texts = cv.fit_transform(Texts)
+```  
+
+As we want to use a part of our dataset (the content of our dataframe) as a set for training the ML model, and the other part for testing the model, we need to find a way to split it into those two parts. For this, we will use the train_test_split function from the sklearn.model_selection library. This function does exactly what we want: it splits the dataset in a traning set and a testing set.
+```python
+from sklearn.model_selection import train_test_split
+
+Texts_train, Texts_test, Subjects_train, Subjects_test = train_test_split(Texts, Subjects, test_size=0.5, random_state=0)
+```
+We pass into the function 4 parameters:
+- Texts: a list containing all the texts extracted from the documents that have been vectorized.
+- Subjects: a list of all the subjects of the texts contained in the Texts variable.
+- test_size: The percentage of the dataset that we want to use as a test set. Here, we set the parameter as 0.5, which means that we use 50% of our dataset as a training set for our model.
+- random_state: We set this parameter at 0. This means that the function will not spit our dataset randomly. If we would heva put any other values, we would get a different result each time because the function would split our dataset randomly.  
+  
+This function retruns 4 variables: 
+- Texts_train: a numpy array containing all the vectorized texts used to train the model
+- Texts_test: a numpy array containing all the vectorized texts used to test the model
+- Subjects_train: a numpy array containing all the subjects used to train the model
+- Subjects_test: a numpy array containing all the subjects used to test the model  
+  
+Once we have these different sets, we can now use a Machine Learning classifier to train with ur training sets and then test it with our test sets. There are many classifiers available for this, but we chose to use the RandomForestClassifier from the sklearn.ensemble library:
+```python
+from sklearn.ensemble import RandomForestClassifier
+
+classifier = RandomForestClassifier()
+classifier.fit(Texts_train, Subjects_train)
+```  
+The fit function builds a forest of trees from the training set Texts_train, Subjects_train.
+Once we have our classifier ready, we can now test it on our test sets, using the predict function, and print the accuracy of the classifier's prediction using the accuracy_score function from the sklearn.metrics library:
+```python
+from sklearn.metrics import accuracy_score
+
+prediction = classifier.predict(Texts_test)
+print("Accuracy: ", accuracy_score(Subjects_test, prediction))
+```  
+With all of this, our model gave us the following accuracy:
+```console
+Accuracy: 0.6
+```
 
 ## 6. Related Work
 ### Prerequisites
