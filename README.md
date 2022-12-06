@@ -332,7 +332,311 @@ import pickle
 pickle.dump(classifier, open("ML_model", 'wb'))
 ```
 
-## 6. Related Work
+## 6. Neural Network model
+Here's another model with Neural Network.
+
+### The dataset
+As for the Bag Of Words model, we need a dataset in order to train our NN model. For this, we downloaded some files (pdf only) on internet with some contents of the different school subjects that our NN is able to handle (Link where 95% of the files come from: https://ocw.mit.edu/). So, that our NN perform on our files, we decided to put some kind of score on each files. The score will be a list where each value is the number of words related to a topic. We perform on 5 topics, so the length of our list will be 5.
+For example, if we have a file with this (very short) content:
+```txt
+Is a computer science and physics double major a good idea if I want to go to medical school?
+```
+The score will be [0, 2, 1, 0, 1] because 'computer' and 'double' are in computer science in our dataset, 'physics' in physics and 'science' in philosophy. So that our AI perform well, we need to have a good dataset.
+Now that we have our files, we need to create a training set, a validation set and a testing set.
+
+All our files are in a folder called 'FileForTraining' and because we want to do supervised learning, we decide labelised the files. In the 'Dataset_filename-Topics.csv', you can find two columns, the first one is for the name of the files and second one is to classify the file by topic. Here's the table for the classification:
+| Topic | Value |
+| --- | --- |
+| Biology | 0 |
+| Computer Science | 1 |
+| Physics | 2 |
+| Chemistry | 3 |
+| Philosophy | 4 |
+
+In the code below, we read, scan and score each files and we store them in the dataframes.
+```python
+key = ['biology', 'compsci', 'physics', 'chemistry', 'philosophy']
+idx = dict()
+for i in range(0,len(key)):
+    idx[key[i]] = i
+
+# Path towards the folder where there are all files
+folder_path = os.path.abspath(os.getcwd()) + '\FileForTraining'
+
+# For each file, we will count
+scores = list()
+data_filename_topics = pd.read_csv('Dataset_fileName-Topics.csv')
+for filename, _ in tqdm(data_filename_topics.values):
+    file = os.path.join(folder_path, filename)
+    if(os.path.isfile(file)):
+        text = None
+        extension = os.path.splitext(file)[1]
+        if extension == ".pdf":  # If the file is a pdf file
+            with open(file, 'rb') as pdfFileObj:
+                pdfReader = PyPDF2.PdfFileReader(pdfFileObj, strict = False)
+                text = re.sub(r'[^\w\s]', ' ', pdfReader.getPage(0).extractText())
+                for pageNumber in range(1, pdfReader.numPages):
+                    pageText = re.sub(r'[^\w\s]', ' ', pdfReader.getPage(pageNumber).extractText())
+                    text = ' '.join([text, pageText])
+
+                text = text.split(' ')
+
+        # If the file is a pdf, we can compute his score
+        if text != None:
+            score = np.zeros(len(key))
+            for word in text:
+                w = word.lower()
+                for subject in dataset:
+                    if(w in dataset[subject]):
+                        score[idx[subject]] += 1
+            scores.append(score)
+    else:
+        print("The file", file, "is not supported.")
+
+# We decide to put all those information in dataframe
+df_x = pd.DataFrame(np.array(scores), columns = key)
+df_y = data_filename_topics['topic']
+```
+It took some times to read, scan and score all the files (3 minutes with our computers).
+Here's what our dataframe give us:
+```txt
+     biology  compsci  physics  chemistry  philosophy
+0        0.0     21.0      0.0        4.0         1.0
+1        0.0     52.0      1.0        2.0         2.0
+2        1.0     98.0      1.0        3.0         6.0
+3        2.0    144.0      7.0        2.0        11.0
+4        0.0    143.0      3.0        4.0        10.0
+..       ...      ...      ...        ...         ...
+299    161.0     51.0     23.0       51.0        20.0
+300    615.0    256.0    209.0      115.0       150.0
+301     46.0    688.0   1763.0      671.0      1126.0
+302      3.0      7.0      2.0        2.0         7.0
+303      5.0    103.0    258.0       63.0       277.0
+
+[304 rows x 5 columns]
+0      1
+1      1
+2      1
+3      1
+4      1
+      ..
+299    0
+300    0
+301    2
+302    4
+303    2
+Name: topic, Length: 304, dtype: int64
+```
+### Let's analyse a bit the data
+```python
+for i in range(0, len(key)):
+    print(f"{key[i]}: {len(df_y[df_y == i])}")
+```
+```txt
+biology: 48
+compsci: 83
+physics: 96
+chemistry: 46
+philosophy: 31
+```
+The number of files per topics isn't really well balanced but we'll work with that. Before using our NN, let's see, if we sort according to the greatest number of words in a topic, if this corresponds to the related topic.
+
+```python
+prediction_max = np.array([np.argmax(row) for row in df_x.values])
+print(f'Number of correct: {sum(df_y.values == prediction_max)} on {len(df_y)} ({sum(df_y.values == prediction_max)*100/len(df_y):.4} %)')
+```
+```txt
+Number of correct: 189 on 304 (62.17 %)
+```
+It seems that just selecting the topic with the most commun words doesn't always work.
+
+### Split the data
+
+Now that we have our dataframe, we have to split it into 3 sets: training, validation, testing set.
+
+```python
+from sklearn.model_selection import train_test_split
+import torch as t
+
+# Split the data into 70% for training, 15% for validation and 15% for testing
+train_x, rest_x, train_y, rest_y = train_test_split(df_x.values, df_y.values, train_size=0.7, shuffle=True)
+val_x, test_x, val_y, test_y = train_test_split(rest_x, rest_y, train_size=0.5, shuffle=True)
+
+# Transformation and normalization
+train_x = t.tensor(train_x, dtype = t.float32)
+val_x = t.tensor(val_x, dtype = t.float32)
+test_x = t.tensor(test_x, dtype = t.float32)
+
+train_y = t.tensor(train_y, dtype= int)
+val_y = t.tensor(val_y, dtype= int)
+test_y = t.tensor(test_y, dtype= int)
+```
+
+### Create the Neural Network
+
+We'll use pytorch to create our NN. Our NN will have 3 hidden layers where each one will have 256 units and for the activation, we'll use ReLU and for the ouput LogSoftMax.
+
+```python
+import torch.nn as nn
+import torch.optim as optim
+from torch.autograd import Variable
+import torch.nn.functional as F
+
+class MLP(nn.Module):
+  def __init__(self, D_in, H, D_out):
+    super(MLP, self).__init__()
+
+    # Inputs to hidden layer linear transformation
+    self.input = nn.Linear(D_in, H)
+    self.hidden = nn.Linear(H, H)
+    self.hidden2 = nn.Linear(H,H)
+    self.output = nn.Linear(H, D_out)
+
+    self.logsoftmax = nn.LogSoftmax()
+
+  def forward(self, x):
+    x = F.relu(self.input(x))
+    x = F.relu(self.hidden(x))
+    x = F.relu(self.hidden2(x))
+    y_pred = self.output(x)
+
+    return y_pred
+```
+
+We have to create the training, the validation (to check loss on validation set) and the evaluation (to compute accuracy) function.
+
+```python
+def train_model(model, criterion, optimizer, train_x, train_y, val_x, val_y, num_epochs = 10, batch_size = 64, show_info = False):
+  # Set model to train mode
+  model.train()
+
+  # Training loop
+  for epoch in range(0,num_epochs):
+    perm = t.randperm(len(train_y))
+    sum_loss = 0.
+
+    for i in range(0, len(train_y), batch_size):
+      x1 = Variable(train_x[perm[i:i + batch_size]], requires_grad=False)
+      y1 = Variable(train_y[perm[i:i + batch_size]], requires_grad=False)
+
+      # Reset gradient
+      optimizer.zero_grad()
+      
+      # Forward
+      fx = model(x1)
+      loss = criterion(fx, y1)
+      
+      # Backward
+      loss.backward()
+      
+      # Update parameters
+      optimizer.step()
+      
+      sum_loss += loss.item()
+
+    val_loss = validation_model(model, criterion, val_x, val_y, batch_size)
+    if(show_info and epoch%10==0):
+      print(f"Epoch: {epoch} \tTraining Loss: {sum_loss} \tValidation Loss: {val_loss}")
+
+def validation_model(model, criterion, val_x, val_y, batch_size):
+  valid_loss = 0
+  perm = t.randperm(len(val_y))
+
+  # Set to validation mode
+  model.eval()
+  
+  for i in range(0, len(val_y), batch_size):
+      x1 = Variable(val_x[perm[i:i + batch_size]], requires_grad=False)
+      y1 = Variable(val_y[perm[i:i + batch_size]], requires_grad=False)
+      
+      # Forward
+      fx = model(x1)
+      loss = criterion(fx, y1)
+      
+      valid_loss += loss.item()
+
+  return valid_loss
+
+def evaluate_model(model, test_x, test_y):
+  model.eval()
+  y_pred = model(test_x)
+
+  y_pred = t.max(y_pred,1).indices
+  accuracy = t.sum(y_pred == test_y)/len(y_pred)
+  
+  return accuracy
+```
+
+### Train the model and check it's accuracy
+
+After several training, we finally chose these hyperparameters.
+```python
+# Hyperparameters
+learning_rate = 1e-3
+epochs = 100
+batch_size = 8
+
+D_in, H, D_out = train_x.shape[1], 256, len(key) # D_in is the number of parameters (so 5 for us); D_out is the number of classes (so 5 for us)
+model = MLP(D_in, H, D_out)
+
+criterion = nn.CrossEntropyLoss()
+optimizer = optim.Adam(model.parameters(), lr = learning_rate)
+
+# Train the model
+train_model(model, criterion, optimizer, train_x, train_y,
+            val_x, val_y, epochs, batch_size, show_info = True)
+
+#Evaluate the model
+accuracy = evaluate_model(model, test_x, test_y)*100
+print(f'Accuracy: {accuracy} %')
+```
+```txt
+Epoch: 0 	Training Loss: 48.503595769405365 	Validation Loss: 14.585851907730103
+Epoch: 10 	Training Loss: 31.11023785918951 	Validation Loss: 8.923621118068695
+Epoch: 20 	Training Loss: 11.212598226964474 	Validation Loss: 4.466354936361313
+Epoch: 30 	Training Loss: 9.06130476295948 	Validation Loss: 5.072529688477516
+Epoch: 40 	Training Loss: 7.096194840967655 	Validation Loss: 5.090612441301346
+Epoch: 50 	Training Loss: 22.226621463894844 	Validation Loss: 7.405122563242912
+Epoch: 60 	Training Loss: 6.410949652083218 	Validation Loss: 7.692902863025665
+Epoch: 70 	Training Loss: 11.587390199303627 	Validation Loss: 5.829236976802349
+Epoch: 80 	Training Loss: 3.534953062655404 	Validation Loss: 7.492872446775436
+Epoch: 90 	Training Loss: 3.3155347015708685 	Validation Loss: 8.136256963014603
+Accuracy: 82.60869598388672 %
+```
+As we see, we have an accuracy of 82.61%. It seems pretty good for us. If we don't have a higher accuracy, it could be because, we don't have enough files to train our model or maybe because our dataset for the scoring is not good (not enough words in the topics, ...).
+
+### Analyse the mistake made by the model
+
+```python
+y_pred = model(test_x)
+y_pred = t.max(y_pred,1).indices
+
+key2 = key.copy()
+key2.append('Total')
+df_result = pd.DataFrame(np.zeros((len(key),len(key) + 1), dtype= int), columns = key2,  index = key)
+df_test_y = pd.DataFrame(test_y, dtype = int)
+df_y_pred = pd.DataFrame(y_pred, dtype = int)
+for i in range(0,len(key)):
+    l = df_test_y[df_y_pred[0] == i]
+    df_result.values[i][len(key)] = len(l)
+    for j in range(0,len(key)):
+        df_result.values[i][j] = len(l[l[0] == j])
+
+print(df_result)
+```
+```txt
+            biology  compsci  physics  chemistry  philosophy  Total
+biology           4        0        0          1           0      5
+compsci           0       12        3          0           0     15
+physics           0        0       13          1           1     15
+chemistry         0        0        1          4           0      5
+philosophy        1        0        0          0           5      6
+```
+In this table, each row represents a kind of file that the neural network should initially associate. The columns represent the number of files that the neural network had associated to a subject. Even if our testing set isn't large, thanks to this table, we can observe that some computer science files could be mistaken with physics files.
+
+So maybe, we have a problem with our dataset.
+
+## 7. Related Work
 ### Prerequisites
 As this project uses some libraries that are not included in the default python package, we need to install them manually. For this, simply run the following command:
   
@@ -340,6 +644,6 @@ As this project uses some libraries that are not included in the default python 
 $ pip install -r requirements.txt
 ```
 
-## 7. Conclusion
+## 8. Conclusion
 
 (Talk about the limits like no permission to move a file)
