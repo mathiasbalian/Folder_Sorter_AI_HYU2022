@@ -332,7 +332,7 @@ import pickle
 pickle.dump(classifier, open("ML_model", 'wb'))
 ```
 
-## 6. Neural Network model
+## 5. Neural Network model
 Here's another model with Neural Network.
 
 ### The dataset
