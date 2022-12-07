@@ -349,7 +349,7 @@ try:
 except:
     print("File not provided or not found")
 ```  
-Then, once this is done, we can finally start calling the model that we previously trained and tested in the Train_Model.py file. From this file, we also use the same CountVectorizer() object that we used to train the model.
+Then, once this is done, we can finally start calling the model that we previously trained and tested in the Train_Model.py file. From this file, we also use the same CountVectorizer() object that we used to train the model and that was called cv.
 ```python
 import os
 from Train_Model import cv
