@@ -352,6 +352,8 @@ except:
 Then, once this is done, we can finally start calling the model that we previously trained and tested in the Train_Model.py file. From this file, we also use the same CountVectorizer() object that we used to train the model and that was called cv.
 ```python
 import os
+from tkinter import filedialog
+from Util import textfrompdf, textfromword
 from Train_Model import cv
 
 try:
@@ -379,6 +381,8 @@ That's why we have to get the element at the first index: because model.predict 
 Once we have te subject, we can proceed just like in the Rule-Based method, by trying to create a folder named after the subject, and moving the file to this new folder.
 ```python
 import os
+from tkinter import filedialog
+from Util import textfrompdf, textfromword
 import shutil
 
 try:
