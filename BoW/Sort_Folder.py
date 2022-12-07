@@ -25,7 +25,13 @@ try:
             elif os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
                 file_text = textfromword(file)
 
-            print(model.predict(cv.transform([file_text])))
+            subject = model.predict(cv.transform([file_text]))[0]
+            try:
+                os.mkdir(folder_path + "/" + subject)
+            except:
+                pass
+
+            shutil.move(file, folder_path + "/" + subject)
         else:
             print("The file", file, "is not supported.")
 
