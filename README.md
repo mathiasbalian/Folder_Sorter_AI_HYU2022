@@ -251,7 +251,14 @@ for subdirs, dirs, files in os.walk("Documents"):  # Iterate over each sudirecto
 
 dataframe = pd.DataFrame(data, columns=["Subject", "Content"])
 ```  
-Everytime the textfrompdf or textfromword functions are called, the text appended to the "data" list is already preprocessed, meaning it has already been tokenized and lemmatized. Therefore, it is ready to be treated by our ML model.
+Everytime the textfrompdf or textfromword functions are called, the text appended to the "data" list is already preprocessed, meaning it has already been tokenized and lemmatized. Therefore, it is ready to be treated by our ML model.  
+Here's a look at our dataframe (only a few lines):
+| Subject | Content |
+| --- | --- |
+| Biology | cotyledon leaflike structure seed leaf pro duc... |
+| Biology | abo blood group blood group antibody b ab may ... |
+| Physics | density kg assuming isentropic flow find mass ... |
+| Physics | ii thus identify effective volume veff identif... |
 
 ### Building the model
 Now that the text has been processed and adapted for a Machine Learning algorithm, we can begin to create our model. As previously mentionned, we will be using the Bag Of Words model. 
