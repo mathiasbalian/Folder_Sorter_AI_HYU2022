@@ -384,6 +384,7 @@ import os
 from tkinter import filedialog
 from Util import textfrompdf, textfromword
 import shutil
+from Train_Model import cv
 
 try:
     for filename in os.listdir(folder_path):
