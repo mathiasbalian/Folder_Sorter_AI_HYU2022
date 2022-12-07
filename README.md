@@ -307,9 +307,9 @@ print("Accuracy: ", accuracy_score(Subjects_test, prediction))
 ```  
 With all of this, our model gave us the following accuracy:
 ```console
-Accuracy: 0.6
+Accuracy: 0.8333333333333334
 ```  
-This means that our model has a 60% accuracy, which is not bad. Of course, if we tweak the parameters of the train_test_split function and changed the test_size parameter, we would get different results.  
+This means that our model has around 83% accuracy, which is pretty decent! Of course, if we tweak the parameters of the train_test_split function and change the test_size parameter, we will get different results.  
 We can now proceed to save the model using the Pickle library:
 ```python
 import pickle
