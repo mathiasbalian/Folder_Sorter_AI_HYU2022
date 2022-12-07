@@ -1,14 +1,10 @@
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
 from Util import textfrompdf, textfromword
 import pandas as pd
 import os
 import pickle
 from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import CountVectorizer
-import tkinter
-import shutil
-from tkinter import filedialog
 
 
 data = []
