@@ -307,15 +307,105 @@ print("Accuracy: ", accuracy_score(Subjects_test, prediction))
 ```  
 With all of this, our model gave us the following accuracy:
 ```console
-Accuracy: 0.8333333333333334
+Accuracy: 0.9
 ```  
-This means that our model has around 83% accuracy, which is pretty decent! Of course, if we tweak the parameters of the train_test_split function and change the test_size parameter, we will get different results.  
+This means that our model has around 90% accuracy, which is pretty decent! Of course, if we tweak the parameters of the train_test_split function and change the test_size parameter, we will get different results.  
 We can now proceed to save the model using the Pickle library:
 ```python
 import pickle
 
 pickle.dump(classifier, open("ML_model", 'wb'))
 ```
+### Using the model
+Once we have saved the model, we can now create a new file, Sort_Folder.py. In this file, we will be able to call the model and choose the directory that we want to sort. We start by loading our model:
+```python
+import pickle
+
+modeload = open("ML_model", "rb")
+model = pickle.load(modeload)
+modeload.close()
+```  
+Once this is done, we open a file dialog in order for the user to choose the directory that he wants to sort. After that, we iterate over each file of the folder and then extract the text.
+```python
+import os
+from tkinter import filedialog
+from Util import textfrompdf, textfromword
+
+# We open a file dialog for the user
+folder_path = filedialog.askdirectory()
+
+try:
+    for filename in os.listdir(folder_path):
+        file = os.path.join(folder_path, filename)
+        if os.path.isfile(file):
+            file_text = ""
+            if os.path.splitext(file)[1] == ".pdf":  # If the file is a pdf file
+                file_text = textfrompdf(file)
+            elif os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
+                file_text = textfromword(file)
+                
+        else:
+            print("The file", file, "is not supported.")
+except:
+    print("File not provided or not found")
+```  
+Then, once this is done, we can finally start calling the model that we previously trained and tested in the Train_Model.py file. From this file, we also use the same CountVectorizer() object that we used to train the model.
+```python
+import os
+from Train_Model import cv
+
+try:
+    for filename in os.listdir(folder_path):
+        file = os.path.join(folder_path, filename)
+        if os.path.isfile(file):
+            file_text = ""
+            if os.path.splitext(file)[1] == ".pdf":  # If the file is a pdf file
+                file_text = textfrompdf(file)
+            elif os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
+                file_text = textfromword(file)
+
+            subject = model.predict(cv.transform([file_text]))[0]
+            
+        else:
+            print("The file", file, "is not supported.")
+except:
+    print("File not provided or not found")
+```  
+The model.predict function will return, for example, the following for a random file:
+```console
+["Compsci"]
+```
+That's why we have to get the element at the first index: because model.predict returns a list of the predictions made from the input.
+Once we have te subject, we can proceed just like in the Rule-Based method, by trying to create a folder named after the subject, and moving the file to this new folder.
+```python
+import os
+import shutil
+
+try:
+    for filename in os.listdir(folder_path):
+        file = os.path.join(folder_path, filename)
+        if os.path.isfile(file):
+            file_text = ""
+            if os.path.splitext(file)[1] == ".pdf":  # If the file is a pdf file
+                file_text = textfrompdf(file)
+            elif os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
+                file_text = textfromword(file)
+
+            subject = model.predict(cv.transform([file_text]))[0]
+            try:
+                os.mkdir(folder_path + "/" + subject)
+            except:
+                pass
+
+            shutil.move(file, folder_path + "/" + subject)
+        else:
+            print("The file", file, "is not supported.")
+
+except:
+    print("File not provided or not found")
+```
+As a result, we will get, as expected, a sorted folder, with subfolders of the school subjects found, and the files correctly sorted in those subfolders.
+Of course, as our model isn't perfectly accurate, some files can be placed in the wrong folder. However, as our model has a 90% accuracy, this is not very likely to happen.
 
 ## 5. Neural Network model
 Here's another model with Neural Network.
