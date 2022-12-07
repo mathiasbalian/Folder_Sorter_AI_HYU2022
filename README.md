@@ -76,8 +76,8 @@ def textfrompdf(path):
         pageobj = pdfreader.getPage(i)
         pdfcontent += pageobj.extractText()
     fileobj.close()
-
-    return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', pdfcontent)))
+    
+    return tokenize_lemmatize(pdfcontent)
 ```
 
 The concept for the docx files is the same as pdf, but this time we use the textract library. We're going to give details about libraries in a next part.
@@ -95,7 +95,59 @@ def textfromword(path):
 
     text = textract.process(path)  # We extract the text from the file
     text = text.decode("utf-8")
-    return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', text)))
+    return tokenize_lemmatize(text)
+```  
+Notice that in both functions, we return a variable defined by the tokenize_lemmatize function. Let's see what this function does.
+
+#### **_Text preprocessing_**
+When reading and extracting text from a pdf or word document, the text can quickly become bloated with some unwanted escape characters, single characters, empty characters etc... That's why we need to tokenize and lemmatize the text. What does this mean ?
+- **Text tokenization**  
+Text tokenization is the process of separating a text into "tokens". Usually, we do this by splitting the text by whitespaces, removing escape characters, punctuation, useless words and putting the text in lowercase. Everything that could be considered as unwanted in a text where only the words themsevles are important is removed.  
+
+```python
+import re
+from nltk.corpus import stopwords
+
+def tokenize_lemmatize(text):
+    lemma = WordNetLemmatizer()
+    clean_text = re.sub(r'\W', ' ', str(text))  # Remove all escape characters
+    clean_text = re.sub('[^a-zA-Z]', ' ', str(text))  # Remove all single characters that are not letters
+    clean_text = clean_text.lower()
+    clean_text = clean_text.split()
+    clean_text = [word for word in clean_text if word not in stopwords.words('english')]
+```
+Here, what this piece of code does is that it removes all single characters and escape characters by a whitespace from the text in the function arguments, puts the text in lowercase and splits the text by whitespaces. Finally, we remove all english stopwords in the text. These stopwords represent some words in the english vocabulary that are not relevant to classify our documents (the, an, in...). For example the code above transforms the string   
+"The\n .sky is 4beautiful, today! "   
+into:
+```console
+sky beautiful today
+```
+As you can see, the text is cleaner and we got rid of all unwanted characters and useless words.  
+The next step is to lemmatize the text  
+- **Text lemmatization**  
+Lemmatization is the process of switching any word to its base root. For example, "leaves" becomes "leaf". Similarly, "caring" becomes "care".
+With the previous step and the lemmatization of the text, we get the following code for our text preprocessing:
+```python
+import re
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+
+def tokenize_lemmatize(text):
+    lemma = WordNetLemmatizer()
+    clean_text = re.sub(r'\W', ' ', str(text))  # Remove all escape characters
+    clean_text = re.sub('[^a-zA-Z]', ' ', str(text))  # Remove all single characters that are not letters
+    clean_text = clean_text.lower()
+    clean_text = clean_text.split()
+    clean_text = [word for word in clean_text if word not in stopwords.words('english')]
+    clean_text = [lemma.lemmatize(word) for word in clean_text]
+    clean_text = ' '.join(clean_text)
+    return clean_text
+```  
+Same thing, the code above transforms the sting  
+"The\n .sky is 4beautiful, these days1! "  
+into
+```console
+sky beautiful day
 ```
 
 #### **_Text Analyzing_** 
@@ -114,10 +166,7 @@ So, we start by extracting the text with the functions we explained just before.
 
 ```python
 def wordcounter(filetext):
-    global total_counter
-    for word in filetext:
-        word = word.lower()
-        total_counter += 1
+    for word in filetext.split(' '):
         for subject in dataset:
             if dataset[subject][0].count(word) > 0:
                 dataset[subject][1] += 1
@@ -155,13 +204,12 @@ folder_path = filedialog.askdirectory()
 
 try:
     for filename in os.listdir(folder_path):
-        total_counter = 0
         file = os.path.join(folder_path, filename)
         if os.path.isfile(file):
             text = []
             if os.path.splitext(file)[1] == ".pdf":  # If the file is a pdf file
                 text = textfrompdf(file)
-            elif os.path.splitext(file)[1] == ".doc" or os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
+            elif os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
                 text = textfromword(file)
 
             wordcounter(text)
@@ -203,71 +251,7 @@ for subdirs, dirs, files in os.walk("Documents"):  # Iterate over each sudirecto
 
 dataframe = pd.DataFrame(data, columns=["Subject", "Content"])
 ```  
-  
-From now on, we could start treating the text that was extracted.  
-
-### Text preprocessing
-When reading and extracting text from a pdf or word document, the text can quickly become bloated with some unwanted escape characters, single characters, empty characters etc... That's why we need to tokenize and lemmatize the text. What does this mean ?
-- **Text tokenization**  
-Text tokenization is the process of separating a text into "tokens". Usually, we do this by splitting the text by whitespaces, removing escape characters, punctuation, useless words and putting the text in lowercase. Everything that could be considered as unwanted in a text where only the words themsevles are important is removed.  
-If we take back our dataframe previously created, we can iterate over each text in this dataframe, and tokenize it using regex expressions:
-
-```python
-import re
-import nltk
-nltk.download('stopwords')
-from nltk.corpus import stopwords
-
-texts = list(dataframe["Content"])
-
-for content in texts:
-    clean = re.sub('[^a-zA-Z]', ' ', str(content))
-    clean = re.sub(r'\W', ' ', str(content))  # Replace all escape characters (\n, \t, etc...)
-    clean = re.sub(r'\s+[a-zA-Z]\s+', ' ', str(content))  # Replace single characters by a whitespace
-    clean = re.sub(r'[^\w\s]', '', str(content))  # Replace all characters that are not a letter
-    clean = clean.lower()  # Put the text in lowercase
-    clean = clean.split()  # Split the text by whitespaces
-    clean = [word for word in clean if word not in stopwords.words('english')]  # Remove all english stop words (the, an, in...)
-```
-For example the code above transforms the string   
-"The\n .sky is 4beautiful, today! "   
-into:
-```console
-['sky', 'beautiful', 'today']
-```
-As you can see, the text is cleaner and we got rid of all unwanted characters and useless words.  
-The next step is to lemmatize the text  
-- **Text lemmatization**  
-Lemmatization is the process of switching any word to its base root. For example, "leaves" becomes "leaf". Similarly, "caring" becomes "care".
-This is very important as it makes it much easier for our ML model to learn and understand the topics of the text that it is analysing.  
-With the previous step and the lemmatization of the text, we get the following code for our text preprocessing:
-```python
-import re
-import nltk
-nltk.download('stopwords')
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-
-lemmatizer = WordNetLemmatizer()
-texts = list(dataframe["Content"])
-texts_cleaned = []
-
-for content in texts:
-    clean = re.sub('[^a-zA-Z]', ' ', str(content))
-    clean = re.sub(r'\W', ' ', str(content))
-    clean = re.sub(r'\s+[a-zA-Z]\s+', ' ', str(content))
-    clean = re.sub(r'[^\w\s]', '', str(content))
-    clean = clean.lower()
-    clean = clean.split()
-    clean = [word for word in clean if word not in stopwords.words('english')]
-    clean = [lemmatizer.lemmatize(word) for word in clean]
-    clean = ' '.join(clean)
-    texts_cleaned.append(clean)
-
-dataframe['Content'] = texts_cleaned
-```
-We have now tokenized and lemmatized each text that we extracted and stored in our dataset.  
-Now that this is finished, we can start buiding our ML model.
+Everytime the textfrompdf or textfromword functions are called, the text appended to the "data" list is already preprocessed, meaning it has already been tokenized and lemmatized. Therefore, it is ready to be treated by our ML model.
 
 ### Building the model
 Now that the text has been processed and adapted for a Machine Learning algorithm, we can begin to create our model. As previously mentionned, we will be using the Bag Of Words model. 
