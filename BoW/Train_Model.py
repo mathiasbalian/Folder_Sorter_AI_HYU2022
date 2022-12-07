@@ -33,7 +33,6 @@ Texts_train, Texts_test, Subjects_train, Subjects_test = train_test_split(Texts,
 classifier = RandomForestClassifier()
 classifier.fit(Texts_train, Subjects_train)
 prediction = classifier.predict(Texts_test)
-print(accuracy_score(Subjects_test, prediction))
 
 pickle.dump(classifier, open("ML_model", 'wb'))
 
