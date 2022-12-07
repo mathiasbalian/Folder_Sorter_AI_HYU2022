@@ -477,8 +477,6 @@ class MLP(nn.Module):
     self.hidden2 = nn.Linear(H,H)
     self.output = nn.Linear(H, D_out)
 
-    self.logsoftmax = nn.LogSoftmax()
-
   def forward(self, x):
     x = F.relu(self.input(x))
     x = F.relu(self.hidden(x))
@@ -621,7 +619,103 @@ In this table, each row represents a kind of file that the neural network should
 
 So maybe, we have a problem with our dataset.
 
-## 7. Related Work
+### Save the model
+
+The model will be save in the file 'save_model.pt'.
+
+```python
+save_model_path = os.path.abspath(os.getcwd()) + '/save_model.pt'
+t.save(model, save_model_path)
+```
+
+### Use the model
+
+Firstly you have to load the model.
+
+```python
+import os
+import numpy as np
+import torch as t
+from tkinter import Tk, filedialog
+import shutil
+from tqdm import tqdm
+
+load_model_path = os.path.abspath(os.getcwd()) + r'\save_model.pt'
+load_model = t.load(load_model_path)
+load_model.eval()
+```
+
+After that you have to select the directory where are stored the file, you need to sort and the program will scan all the files to create data for the model. The scan can take some times.
+
+```python
+# This the list of all topics that our AI knows and was train for
+key = ['biology', 'compsci', 'physics', 'chemistry', 'philosophy']
+
+root = Tk()
+root.withdraw()
+
+root.attributes('-topmost', True)
+folder_path = filedialog.askdirectory()
+
+# For each file, we will count
+scores = list()
+filename_list = list()
+print("Scan of the files in progress...\t(can take some times with several files)")
+for filename in tqdm(os.listdir(folder_path)):
+    file = os.path.join(folder_path, filename)
+    if(os.path.isfile(file)):
+        text = None
+        extension = os.path.splitext(file)[1]
+        if extension == ".pdf":  # If the file is a pdf file
+            with open(file, 'rb') as pdfFileObj:
+                pdfReader = PyPDF2.PdfFileReader(pdfFileObj, strict = False)
+                text = re.sub(r'[^\w\s]', ' ', pdfReader.getPage(0).extractText())
+                for pageNumber in range(1, pdfReader.numPages):
+                    pageText = re.sub(r'[^\w\s]', ' ', pdfReader.getPage(pageNumber).extractText())
+                    text = ' '.join([text, pageText])
+
+                text = text.split(' ')
+
+        # If the file is a pdf, we can compute his score
+        if text != None:
+            score = np.zeros(len(key))
+            for word in text:
+                w = word.lower()
+                for subject in dataset:
+                    if(w in dataset[subject]):
+                        score[idx[subject]] += 1
+            scores.append(score)
+            filename_list.append(file)
+    else:
+        print("The file", file, "is not supported.")
+print("Scan finish")
+```
+Finally, you run the code below to sort all you files. The program will move all your files and sorted them by creating folder for each topics. These folder will be created in the same directory, selected before.
+
+```python
+# Path where the AI will create the folder with the files sorted
+# The result will appear in the same folder that you have selected but if you want, you can modify the path
+files_sorted_path = folder_path
+
+data = t.tensor(np.array(scores), dtype = t.float32)
+
+# We predict to which topic are related each files
+load_model.eval()
+data_prediction = load_model(data)
+data_prediction = t.max(data_prediction,1).indices
+
+# We create the folder of the topics found by the AI
+for i in range(len(key)):
+    if i in data_prediction:
+        if not os.path.exists(files_sorted_path + f'/{key[i]}'):
+            os.makedirs(files_sorted_path + f'/{key[i]}')
+
+# We move all the files in the topic sorted by the AI
+for i in range(len(filename_list)):
+    shutil.move(filename_list[i], files_sorted_path + f"/{key[data_prediction[i]]}/{os.path.basename(filename_list[i])}")
+```
+
+## 6. Related Work
 ### Prerequisites
 As this project uses some libraries that are not included in the default python package, we need to install them manually. For this, simply run the following command:
   
@@ -629,6 +723,6 @@ As this project uses some libraries that are not included in the default python 
 $ pip install -r requirements.txt
 ```
 
-## 8. Conclusion
+## 7. Conclusion
 
 (Talk about the limits like no permission to move a file)
