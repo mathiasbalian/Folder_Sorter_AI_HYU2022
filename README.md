@@ -492,8 +492,6 @@ class MLP(nn.Module):
     self.hidden2 = nn.Linear(H,H)
     self.output = nn.Linear(H, D_out)
 
-    self.logsoftmax = nn.LogSoftmax()
-
   def forward(self, x):
     x = F.relu(self.input(x))
     x = F.relu(self.hidden(x))
