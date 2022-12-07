@@ -18,9 +18,7 @@ f.close()
 
 
 def wordcounter(filetext):
-    global total_counter
-    for word in filetext:
-        word = word.lower()
+    for word in filetext.split(' '):
         for subject in dataset:
             if dataset[subject][0].count(word) > 0:
                 dataset[subject][1] += 1
@@ -47,13 +45,12 @@ folder_path = filedialog.askdirectory()
 
 try:
     for filename in os.listdir(folder_path):
-        total_counter = 0
         file = os.path.join(folder_path, filename)
         if os.path.isfile(file):
             text = []
             if os.path.splitext(file)[1] == ".pdf":  # If the file is a pdf file
                 text = textfrompdf(file)
-            elif os.path.splitext(file)[1] == ".doc" or os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
+            elif os.path.splitext(file)[1] == ".docx":  # If the file is a docx or doc
                 text = textfromword(file)
 
             wordcounter(text)
