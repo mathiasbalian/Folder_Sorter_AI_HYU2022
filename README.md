@@ -75,6 +75,7 @@ def textfrompdf(path):
     for i in range(0, pdfreader.numPages):  # We iterate over the pages of the document
         pageobj = pdfreader.getPage(i)
         pdfcontent += pageobj.extractText()
+    fileobj.close()
 
     return list(filter(None, re.split(r'[\r\n\t\xa0]+| ', pdfcontent)))
 ```
