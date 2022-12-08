@@ -826,12 +826,6 @@ https://www.datacamp.com/tutorial/text-classification-python
   
 When it comes to text preprocessing, we had to look on how to tokenize and lemmatize texts. We already knew about regex expressions to remove unwanted characters, but we had to search on internet how to do it, what were the libraries already existing and how to use them:  
 https://www.machinelearningplus.com/nlp/lemmatization-examples-python/
-### Prerequisites
-As this project uses some libraries that are not included in the default python package, we need to install them manually. For this, simply run the following command:
-  
-```console
-$ pip install -r requirements.txt
-```
 
 ## 7. Conclusion
 
