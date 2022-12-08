@@ -818,6 +818,14 @@ for i in range(len(filename_list)):
 ```
 
 ## 6. Related Work
+### Existing studies
+Classifying documents is a pretty famous topic when it comes to AI and Natural Language Processing. There's a decent amount of already existing studies on this subject, most of them discussing how to classify users' reviews on a product as negative or positive. In our case, we didn't find any already existing study that directly sorted a folder, but we still used some websites that treated a similar subject, especially for the bag of words method:  
+https://newscatcherapi.com/blog/how-to-classify-text-with-python-transformers-and-scikit-learn  
+https://realpython.com/python-keras-text-classification/  
+https://www.datacamp.com/tutorial/text-classification-python  
+  
+When it comes to text preprocessing, we had to look on how to tokenize and lemmatize texts. We already knew about regex expressions to remove unwanted characters, but we had to search on internet how to do it, what were the libraries already existing and how to use them:  
+https://www.machinelearningplus.com/nlp/lemmatization-examples-python/
 ### Prerequisites
 As this project uses some libraries that are not included in the default python package, we need to install them manually. For this, simply run the following command:
   
