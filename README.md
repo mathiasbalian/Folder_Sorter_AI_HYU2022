@@ -829,7 +829,3 @@ https://www.datacamp.com/tutorial/text-classification-python
   
 When it comes to text preprocessing, we had to look on how to tokenize and lemmatize texts. We already knew about regex expressions to remove unwanted characters, but we had to search on internet how to do it, what were the libraries already existing and how to use them:  
 https://www.machinelearningplus.com/nlp/lemmatization-examples-python/
-
-## 7. Conclusion
-
-(Talk about the limits like no permission to move a file)
